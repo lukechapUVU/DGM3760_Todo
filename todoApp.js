@@ -1,73 +1,135 @@
-const todoParent = document.getElementsByClassName('todoList')[0]
-let todoList = todoParent.children;
-let input = document.getElementsByTagName('input')[0];
-
-let pending = document.getElementsByClassName('pending')[0];
-setInterval(function() {
-    for(let i = 0; i < todoList.length; i++) {
-        todoList[i].addEventListener('click', function () {
-            completeTodo(i);
-        });
+let todos = [
+    {
+        todoID: 0,
+        todoName: 'Wash dishes',
+        done: false
+    },
+    {
+        todoID: 1,
+        todoName: 'Walk the dog',
+        done: true
     }
-    pending.textContent = getPendingTasks();
-}, 500);
+];
 
-function editTodoName(idx, newName) {
-    todoList[idx].innerText = newName;
-    return newName;
-}
+
+const todoList = document.querySelector('.todoList');
+let input = document.querySelector('.userInput');
+let addBtn = document.querySelector('.addBtn');
+let pending = document.querySelector('.pending');
+
+todoList.addEventListener('click', event => {
+    if(!event.target.dataset.todoid) {
+        event.path.forEach(tag => {
+            if(tag.localName == 'li') {
+                console.log(tag.dataset.todoid)
+                deleteTodo(tag.dataset.todoid);
+            };
+        })
+    }
+    else {
+        completeTodo(event.target.dataset.todoid);
+    }
+})
+
+addBtn.addEventListener('click', event => {
+    if(input.value == '') return;
+    addTodo(input.value);
+
+    pending.innerHTML = getPendingTasks();
+    loadTodos();
+})
+
+input.addEventListener('keypress', event => {
+    if(event.key == 'Enter') {
+        if(input.value == '') return;
+        addTodo(input.value);
+
+        pending.innerHTML = getPendingTasks();
+        loadTodos();
+    }
+})
+
 
 function completeTodo(idx) {
-    todoList[idx].className = 'done';
+    let todoIdx = todos.findIndex(todo => todo.todoID == idx);
+
+    todos[todoIdx].done = !todos[todoIdx].done;
+
+    pending.innerHTML = getPendingTasks();
+    loadTodos();
 }
 
-function addTodo() {
-    input.value = 'test';
-    if(input.value == '') {
-        alert('No value was given!');
-        return;
-    }
-    let newTodo = document.createElement('li');
-    newTodo.innerText = input.value;
+function addTodo(name) {
+    let duplicateName = false;
+    todos.forEach(todo => {
+        if(todo.todoName.toLowerCase() == input.value.toLowerCase()) {
+            alert('That task already exists');
+            duplicateName = true;
+        }
+    })
     input.value = '';
-    newTodo = appendElements(newTodo);
-    todoParent.appendChild(newTodo);
-    /*for(let i = 0; i < todoList.length; i++) {
-        todoList[i].children[0].addEventListener('click', function () {
-            deleteTodo(i);
-        })
-    }*/
-}
+    if(duplicateName) return;
+    let newTodo = {
+        todoID: todos.length,
+        todoName: name,
+        done: false
+    }
+    todos.push(newTodo);
 
-function appendElements(newTodo) {
-    let trashSpan = document.createElement('span');
-    let trashIcon = document.createElement('i');
-    trashIcon.className = 'fa fa-trash';
-    trashSpan.appendChild(trashIcon);
-    newTodo.appendChild(trashSpan);
-    return newTodo;
+    pending.innerHTML = getPendingTasks();
+    loadTodos();
 }
 
 function deleteTodo(idx) {
-    return todoParent.removeChild(todoList[idx]);
+    todos.splice(idx, 1);
+    reassignIDs();
+    console.log(todos);
+    pending.innerHTML = getPendingTasks();
+    loadTodos();
+}
+
+function clearDone() {
+    let i = todos.length
+    while (i--) {
+        if (todos[i].done) { 
+            todos.splice(i, 1);
+        } 
+    }
+
+    pending.innerHTML = getPendingTasks();
+    loadTodos();
+}
+
+function reassignIDs() {
+    for(let i = 0; i < todos.length; i++) {
+        todos[i].todoID = i;
+    }
 }
 
 function getPendingTasks() {
     let count = 0;
-    for(let i = 0; i < todoList.length; i++) {
-        if(todoList[i].className != 'done') {
-            count++;
-        }
-    }
+    todos.forEach(todo => {
+        if(!todo.done) count++;
+    })
     return count;
 }
 
-function clearDone() {
-    for(let i = 0; i < todoList.length; i++) {
-        if(todoList[i].className == 'done') {
-            todoParent.removeChild(todoList[i]);
-            i--;
-        }
-    }
-    return;
+
+function loadTodos() {
+
+    todoList.innerHTML = '';
+
+    todos.forEach(todo => {
+        let done = todo.done ? 'done' : '';
+        let todoLI = `<li class="${done}" data-todoID='${todo.todoID}'>
+                        ${todo.todoName}<span> <i class="fa fa-trash"></i></span>
+                    </li>`;
+        todoList.insertAdjacentHTML('beforeend', todoLI);
+
+    })
+
 }
+
+pending.innerHTML = getPendingTasks();
+loadTodos();
+

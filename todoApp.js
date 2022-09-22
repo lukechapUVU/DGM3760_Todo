@@ -1,3 +1,4 @@
+/* -------- TODOS -------- */
 let todos = [
     {
         todoID: 0,
@@ -11,17 +12,16 @@ let todos = [
     }
 ];
 
-
 const todoList = document.querySelector('.todoList');
-let input = document.querySelector('.userInput');
-let addBtn = document.querySelector('.addBtn');
+let todoInput = document.querySelector('.userInputTodo');
+let addBtnTodo = document.querySelector('.addBtnTodo');
+let clear = document.querySelector('.clearTodo');
 let pending = document.querySelector('.pending');
 
 todoList.addEventListener('click', event => {
     if(!event.target.dataset.todoid) {
         event.path.forEach(tag => {
             if(tag.localName == 'li') {
-                console.log(tag.dataset.todoid)
                 deleteTodo(tag.dataset.todoid);
             };
         })
@@ -31,22 +31,26 @@ todoList.addEventListener('click', event => {
     }
 })
 
-addBtn.addEventListener('click', event => {
-    if(input.value == '') return;
-    addTodo(input.value);
+addBtnTodo.addEventListener('click', event => {
+    if(todoInput.value == '') return;
+    addTodo(todoInput.value);
 
     pending.innerHTML = getPendingTasks();
     loadTodos();
 })
 
-input.addEventListener('keypress', event => {
+todoInput.addEventListener('keypress', event => {
     if(event.key == 'Enter') {
-        if(input.value == '') return;
-        addTodo(input.value);
+        if(todoInput.value == '') return;
+        addTodo(todoInput.value);
 
         pending.innerHTML = getPendingTasks();
         loadTodos();
     }
+})
+
+clear.addEventListener('click', event => {
+    clearDone();
 })
 
 
@@ -62,12 +66,12 @@ function completeTodo(idx) {
 function addTodo(name) {
     let duplicateName = false;
     todos.forEach(todo => {
-        if(todo.todoName.toLowerCase() == input.value.toLowerCase()) {
+        if(todo.todoName.toLowerCase() == todoInput.value.toLowerCase()) {
             alert('That task already exists');
             duplicateName = true;
         }
     })
-    input.value = '';
+    todoInput.value = '';
     if(duplicateName) return;
     let newTodo = {
         todoID: todos.length,
@@ -82,8 +86,8 @@ function addTodo(name) {
 
 function deleteTodo(idx) {
     todos.splice(idx, 1);
+
     reassignIDs();
-    console.log(todos);
     pending.innerHTML = getPendingTasks();
     loadTodos();
 }
@@ -121,10 +125,10 @@ function loadTodos() {
 
     todos.forEach(todo => {
         let done = todo.done ? 'done' : '';
-        let todoLI = `<li class="${done}" data-todoID='${todo.todoID}'>
+        let todoElement = `<li class="${done}" data-todoID='${todo.todoID}'>
                         ${todo.todoName}<span> <i class="fa fa-trash"></i></span>
                     </li>`;
-        todoList.insertAdjacentHTML('beforeend', todoLI);
+        todoList.insertAdjacentHTML('beforeend', todoElement);
 
     })
 
@@ -133,3 +137,60 @@ function loadTodos() {
 pending.innerHTML = getPendingTasks();
 loadTodos();
 
+/*-------- CATEGORIES --------*/
+let cats = [
+    {
+        catID: 0,
+        catName: 'House chores',
+    },
+    {
+        catID: 1,
+        catName: 'Homework',
+    }
+];
+
+const catList = document.querySelector('.catList');
+let catInput = document.querySelector('.userInputCat');
+let addBtnCat = document.querySelector('.addBtnCat');
+
+addBtnCat.addEventListener('click', event => {
+    if(catInput.value == '') return;
+    addCat(catInput.value);
+
+    loadCats();
+})
+
+function addCat(name) {
+    let duplicateName = false;
+    cats.forEach(cat => {
+        if(cat.catName.toLowerCase() == catInput.value.toLowerCase()) {
+            alert('That task already exists');
+            duplicateName = true;
+        }
+    })
+    catInput.value = '';
+    if(duplicateName) return;
+    let newCat = {
+        catID: cats.length,
+        catName: name,
+    }
+    cats.push(newCat);
+
+    loadCats();
+}
+
+
+function loadCats() {
+    catList.innerHTML = '';
+
+    cats.forEach(cat => {
+        let catElement = `<li data-catID='${cat.catID}'>
+                        ${cat.catName}<span> <i class="fa fa-trash"></i></span>
+                    </li>`;
+        catList.insertAdjacentHTML('beforeend', catElement);
+
+    })
+
+}
+
+loadCats();

@@ -47,14 +47,21 @@ button {
   font-weight: 600;
 }
 
-.wrapper .inputField {
+.wrapper .todoInput {
   display: flex;
   height: 45px;
   width: 100%;
   margin: 20px 0;
 }
 
-.inputField input {
+.wrapper .categoryInput {
+  display: flex;
+  height: 45px;
+  width: 100%;
+  margin: 20px 0;
+}
+
+.todoInput input {
   width: 85%;
   height: 100%;
   border: 1px solid var(--sub-grey);
@@ -63,7 +70,22 @@ button {
   padding-left: 15px;
 }
 
-.inputField button {
+.categoryInput input {
+  width: 85%;
+  height: 100%;
+  border: 1px solid var(--sub-grey);
+  font-size: 17px;
+  border-radius: 3px;
+  padding-left: 15px;
+}
+
+.todoInput button {
+  width: 45px;
+  margin-left: 10px;
+  font-size: 22px;
+}
+
+.categoryInput button {
   width: 45px;
   margin-left: 10px;
   font-size: 22px;
@@ -74,10 +96,33 @@ button {
   overflow-y: scroll;
 }
 
+.wrapper .catList {
+  max-height: 250px;
+  overflow-y: scroll;
+}
+
 .todoList::-webkit-scrollbar {
   width: 0;
 }
+
+.catList::-webkit-scrollbar {
+  width: 0;
+}
+
 .todoList li {
+  list-style: none;
+  height: 45px;
+  line-height: 45px;
+  position: relative;
+  background: var(--main-grey);
+  margin-bottom: 8px;
+  border-radius: 3px;
+  padding-left: 15px;
+  cursor: default;
+  overflow: hidden;
+}
+
+.catList li {
   list-style: none;
   height: 45px;
   line-height: 45px;
@@ -119,6 +164,35 @@ button {
 }
 
 .todoList li:hover span {
+  right: 0;
+}
+
+
+.catList li span {
+  position: absolute;
+  right: -45px;
+  width: 45px;
+  color: var(--main-white);
+  text-align: center;
+  background: var(--main-red);
+  border-radius: 0 3px 3px 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.catList li span.editBtn {
+  position: absolute;
+  right: -45px;
+  width: 45px;
+  color: var(--main-white);
+  text-align: center;
+  background: var(--yellow);
+
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.catList li:hover span {
   right: 0;
 }
 

@@ -118,8 +118,8 @@ button {
   margin-bottom: 8px;
   border-radius: 3px;
   padding-left: 15px;
-  cursor: default;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .catList li {
@@ -127,12 +127,19 @@ button {
   height: 45px;
   line-height: 45px;
   position: relative;
-  background: var(--main-grey);
+  background-color: lightgray;
+  margin-right: 4px;
   margin-bottom: 8px;
   border-radius: 3px;
   padding-left: 15px;
   cursor: default;
   overflow: hidden;
+}
+
+.catList li p {
+  padding-left: 4px;
+  background: var(--main-grey);
+  cursor: pointer;
 }
 
 .done {
@@ -166,7 +173,6 @@ button {
 .todoList li:hover span {
   right: 0;
 }
-
 
 .catList li span {
   position: absolute;

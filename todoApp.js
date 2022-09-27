@@ -3,12 +3,14 @@ let todos = [
     {
         todoID: 0,
         todoName: 'Wash dishes',
-        done: false
+        done: false,
+        categoryID: 2
     },
     {
         todoID: 1,
         todoName: 'Walk the dog',
-        done: true
+        done: true,
+        categoryID: 0
     }
 ];
 
@@ -108,6 +110,9 @@ function reassignIDs() {
     for(let i = 0; i < todos.length; i++) {
         todos[i].todoID = i;
     }
+    for(let i = 0; i < cats.length; i++) {
+        cats[i].catID = i;
+    }
 }
 
 function getPendingTasks() {
@@ -118,26 +123,6 @@ function getPendingTasks() {
     return count;
 }
 
-
-function loadTodos() {
-
-    todoList.innerHTML = '';
-
-    todos.forEach(todo => {
-        let done = todo.done ? 'done' : '';
-        let todoElement = `<li class="${done}" data-todoID='${todo.todoID}'>
-                        ${todo.todoName}<span> <i class="fa fa-trash"></i></span>
-                    </li>`;
-        todoList.insertAdjacentHTML('beforeend', todoElement);
-
-    })
-
-}
-
-pending.innerHTML = getPendingTasks();
-loadTodos();
-
-/*-------- CATEGORIES --------*/
 let cats = [
     {
         catID: 0,
@@ -149,15 +134,56 @@ let cats = [
     }
 ];
 
+function loadTodos() {
+
+    todoList.innerHTML = '';
+
+    todos.forEach(todo => {
+        let done = todo.done ? 'done' : '';
+        let todoElement = `<li class="${done}" data-todoID='${todo.todoID}'>
+                        ${todo.todoName} > Category: ${categoryLookup(todo.categoryID)}<span> <i class="fa fa-trash"></i></span>
+                    </li>`;
+        todoList.insertAdjacentHTML('beforeend', todoElement);
+
+    })
+
+}
+
+pending.innerHTML = getPendingTasks();
+loadTodos();
+
+/*-------- CATEGORIES --------*/
 const catList = document.querySelector('.catList');
 let catInput = document.querySelector('.userInputCat');
 let addBtnCat = document.querySelector('.addBtnCat');
+
+catList.addEventListener('click', event => {
+    if((event.path[0].localName == 'i' || event.path[0].localName == 'span')) {
+        event.path.forEach(tag => {
+            if(tag.localName == 'li') {
+                deleteCat(tag.dataset.catid);
+            };
+        })
+    }
+    else if(event.path[0].localName == 'p') {
+        editCat(event.target);
+    }
+})
 
 addBtnCat.addEventListener('click', event => {
     if(catInput.value == '') return;
     addCat(catInput.value);
 
     loadCats();
+})
+
+catInput.addEventListener('keypress', event => {
+    if(event.key == 'Enter') {
+        if(catInput.value == '') return;
+        addCat(catInput.value);
+
+        loadCats();
+    }
 })
 
 function addCat(name) {
@@ -179,18 +205,47 @@ function addCat(name) {
     loadCats();
 }
 
+function editCat(pTag) {
+    const input = document.createElement('input');
+    input.className = 'catEditInput';
+    input.setAttribute('value', pTag.textContent.trim());
+    pTag.replaceWith(input);
+
+    input.addEventListener('keypress', event => {
+        if(event.key == 'Enter') {
+            const newPTag = document.createElement('p');
+            newPTag.textContent = event.target.value;
+            input.replaceWith(newPTag);
+            cats[event.path[1].dataset.catid].catName = newPTag.textContent;
+            loadTodos();
+        }
+    })
+
+    
+}
+
+function deleteCat(idx) {
+    cats.splice(idx, 1);
+
+    reassignIDs();
+    loadCats();
+}
+
+function categoryLookup(categoryID) {
+    return (cats.at(categoryID) ? cats.at(categoryID).catName : 'none')
+}
 
 function loadCats() {
     catList.innerHTML = '';
 
     cats.forEach(cat => {
-        let catElement = `<li data-catID='${cat.catID}'>
-                        ${cat.catName}<span> <i class="fa fa-trash"></i></span>
+        let catElement = `<li class="category-list-item" data-catid='${cat.catID}'><p data-editable>
+                        ${cat.catName}<span id="delete"> <i id="delete" class="fa fa-trash"></i></span></p>
                     </li>`;
         catList.insertAdjacentHTML('beforeend', catElement);
 
     })
-
+    loadTodos();
 }
 
 loadCats();

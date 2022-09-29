@@ -35,7 +35,7 @@ button {
 
 .wrapper {
   margin: 120px auto;
-  max-width: 400px;
+  max-width: 600px;
   width: 100%;
   border-radius: 5px;
   background: var(--main-white);
@@ -61,8 +61,8 @@ button {
   margin: 20px 0;
 }
 
-.todoInput input {
-  width: 85%;
+input {
+  width: 60%;
   height: 100%;
   border: 1px solid var(--sub-grey);
   font-size: 17px;
@@ -70,18 +70,19 @@ button {
   padding-left: 15px;
 }
 
-.categoryInput input {
-  width: 85%;
+select {
+  width: 40%;
   height: 100%;
   border: 1px solid var(--sub-grey);
   font-size: 17px;
   border-radius: 3px;
   padding-left: 15px;
+  margin-left: 5px;
 }
 
 .todoInput button {
   width: 45px;
-  margin-left: 10px;
+  margin-left: 5px;
   font-size: 22px;
 }
 

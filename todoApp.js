@@ -19,6 +19,17 @@ let todoInput = document.querySelector('.userInputTodo');
 let addBtnTodo = document.querySelector('.addBtnTodo');
 let clear = document.querySelector('.clearTodo');
 let pending = document.querySelector('.pending');
+const catSelect = document.querySelector('#cats');
+
+console.log(catSelect.children);
+
+catSelect.childNodes[0].addEventListener('click', event => {
+    console.log(event.target);
+})
+catSelect.addEventListener('click', event => {
+    console.log(event.pointerId);
+    //console.log(event.target.children[2].value);
+})
 
 todoList.addEventListener('click', event => {
     if(!event.target.dataset.todoid) {
@@ -245,6 +256,12 @@ function loadCats() {
         catList.insertAdjacentHTML('beforeend', catElement);
 
     })
+
+    cats.forEach(cat => {
+        let catOption = `<option value="${cat.catID}" id="${cat.catName}">${cat.catName}</option>`;
+        catSelect.insertAdjacentHTML('beforeend', catOption);
+    })
+
     loadTodos();
 }
 

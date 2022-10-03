@@ -4,7 +4,7 @@ let todos = [
         todoID: 0,
         todoName: 'Wash dishes',
         done: false,
-        categoryID: 2
+        categoryID: null
     },
     {
         todoID: 1,
@@ -20,15 +20,17 @@ let addBtnTodo = document.querySelector('.addBtnTodo');
 let clear = document.querySelector('.clearTodo');
 let pending = document.querySelector('.pending');
 const catSelect = document.querySelector('#cats');
+const catFilter = document.querySelector('#catsFilter')
 
-console.log(catSelect.children);
-
-catSelect.childNodes[0].addEventListener('click', event => {
-    console.log(event.target);
-})
-catSelect.addEventListener('click', event => {
-    console.log(event.pointerId);
-    //console.log(event.target.children[2].value);
+catFilter.addEventListener('change', event => {
+    //console.log(event.target.value);
+    if(event.target.value == '' || event.target.value == 'all') {
+        displayCategorizedTodos(null);
+    }
+    else {
+        displayCategorizedTodos(event.target.value);
+    }
+    
 })
 
 todoList.addEventListener('click', event => {
@@ -46,7 +48,13 @@ todoList.addEventListener('click', event => {
 
 addBtnTodo.addEventListener('click', event => {
     if(todoInput.value == '') return;
-    addTodo(todoInput.value);
+    if(catSelect.value == '' || catSelect.value == 'none') {
+        console.log(catSelect.value)
+        addTodo(todoInput.value, null);
+    }
+    else {
+        addTodo(todoInput.value, catSelect.value);
+    }
 
     pending.innerHTML = getPendingTasks();
     loadTodos();
@@ -66,6 +74,35 @@ clear.addEventListener('click', event => {
     clearDone();
 })
 
+function displayCategorizedTodos(catID) {
+    if(catID == null) {
+        //console.log(todos);
+    }
+    else {
+        todos.forEach(todo => {
+            if(todo.categoryID == catID) {
+                for(let i = 0; i < todoList.children.length; i++) {
+                    console.log(todo.todoName)
+                    console.log(todoList.children[i])
+                    if(todoList.children[i].dataset.todoid == todo.todoID) {
+                        if(todoList.children[i].id == 'hide') {
+                            todoList.children[i].id = '';
+                        }
+                    }
+                    else {
+                        //TODO
+                        todoList.children[i].id = 'hide';
+                    }
+                }
+            }
+            else {
+                for(let i = 0; i < todoList.children.length; i++) {
+                    todoList.children[i].id = 'hide';
+                }
+            }
+        })
+    }
+}
 
 function completeTodo(idx) {
     let todoIdx = todos.findIndex(todo => todo.todoID == idx);
@@ -76,7 +113,7 @@ function completeTodo(idx) {
     loadTodos();
 }
 
-function addTodo(name) {
+function addTodo(name, category) {
     let duplicateName = false;
     todos.forEach(todo => {
         if(todo.todoName.toLowerCase() == todoInput.value.toLowerCase()) {
@@ -89,9 +126,11 @@ function addTodo(name) {
     let newTodo = {
         todoID: todos.length,
         todoName: name,
-        done: false
+        done: false,
+        categoryID: category
     }
     todos.push(newTodo);
+    console.log(todos)
 
     pending.innerHTML = getPendingTasks();
     loadTodos();
@@ -243,6 +282,9 @@ function deleteCat(idx) {
 }
 
 function categoryLookup(categoryID) {
+    if(categoryID == null) {
+        return 'none';
+    }
     return (cats.at(categoryID) ? cats.at(categoryID).catName : 'none')
 }
 
@@ -260,6 +302,11 @@ function loadCats() {
     cats.forEach(cat => {
         let catOption = `<option value="${cat.catID}" id="${cat.catName}">${cat.catName}</option>`;
         catSelect.insertAdjacentHTML('beforeend', catOption);
+    })
+
+    cats.forEach(cat => {
+        let catOption = `<option value="${cat.catID}" id="${cat.catName}">${cat.catName}</option>`;
+        catFilter.insertAdjacentHTML('beforeend', catOption);
     })
 
     loadTodos();

@@ -110,6 +110,10 @@ select {
   width: 0;
 }
 
+#hide {
+  display: none;
+}
+
 .todoList li {
   list-style: none;
   height: 45px;

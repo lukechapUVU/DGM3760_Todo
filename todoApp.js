@@ -4,12 +4,14 @@ let todos = [
         todoID: 0,
         todoName: 'Wash dishes',
         done: false,
+        hide: false,
         categoryID: null
     },
     {
         todoID: 1,
         todoName: 'Walk the dog',
         done: true,
+        hide: false,
         categoryID: 0
     }
 ];
@@ -49,7 +51,6 @@ todoList.addEventListener('click', event => {
 addBtnTodo.addEventListener('click', event => {
     if(todoInput.value == '') return;
     if(catSelect.value == '' || catSelect.value == 'none') {
-        console.log(catSelect.value)
         addTodo(todoInput.value, null);
     }
     else {
@@ -76,13 +77,30 @@ clear.addEventListener('click', event => {
 
 function displayCategorizedTodos(catID) {
     if(catID == null) {
-        //console.log(todos);
+        for(let i = 0; i < todoList.children.length; i++) {
+            if(todoList.children[i].id == 'hide') {
+                todoList.children[i].id = '';
+            }
+        }
     }
     else {
         todos.forEach(todo => {
             if(todo.categoryID == catID) {
+                if(todo.hide == true) {
+                    todo.hide = false;
+                }
+            }
+            else {
+                console.log(todo.categoryID);
+                if(todo.hide == false) {
+                    todo.hide = true;
+                }
+            }
+            
+            /*
+            if(todo.categoryID == catID) {
+                
                 for(let i = 0; i < todoList.children.length; i++) {
-                    console.log(todo.todoName)
                     console.log(todoList.children[i])
                     if(todoList.children[i].dataset.todoid == todo.todoID) {
                         if(todoList.children[i].id == 'hide') {
@@ -94,13 +112,16 @@ function displayCategorizedTodos(catID) {
                         todoList.children[i].id = 'hide';
                     }
                 }
+               
             }
             else {
                 for(let i = 0; i < todoList.children.length; i++) {
                     todoList.children[i].id = 'hide';
                 }
             }
+             */
         })
+        loadTodos();
     }
 }
 
@@ -127,10 +148,10 @@ function addTodo(name, category) {
         todoID: todos.length,
         todoName: name,
         done: false,
+        hide: false,
         categoryID: category
     }
     todos.push(newTodo);
-    console.log(todos)
 
     pending.innerHTML = getPendingTasks();
     loadTodos();
@@ -190,7 +211,8 @@ function loadTodos() {
 
     todos.forEach(todo => {
         let done = todo.done ? 'done' : '';
-        let todoElement = `<li class="${done}" data-todoID='${todo.todoID}'>
+        let hide = false;
+        let todoElement = `<li id="${hide}" class="${done}" data-todoID='${todo.todoID}'>
                         ${todo.todoName} > Category: ${categoryLookup(todo.categoryID)}<span> <i class="fa fa-trash"></i></span>
                     </li>`;
         todoList.insertAdjacentHTML('beforeend', todoElement);
@@ -268,9 +290,9 @@ function editCat(pTag) {
             input.replaceWith(newPTag);
             cats[event.path[1].dataset.catid].catName = newPTag.textContent;
             loadTodos();
+            loadCats();
         }
     })
-
     
 }
 
@@ -282,7 +304,7 @@ function deleteCat(idx) {
 }
 
 function categoryLookup(categoryID) {
-    if(categoryID == null) {
+    if(categoryID == null || categoryID == NaN) {
         return 'none';
     }
     return (cats.at(categoryID) ? cats.at(categoryID).catName : 'none')
@@ -290,6 +312,8 @@ function categoryLookup(categoryID) {
 
 function loadCats() {
     catList.innerHTML = '';
+    catFilter.innerHTML = '';
+    catSelect.innerHTML = '';
 
     cats.forEach(cat => {
         let catElement = `<li class="category-list-item" data-catid='${cat.catID}'><p data-editable>
@@ -299,11 +323,17 @@ function loadCats() {
 
     })
 
+    let presentSelect = `<option value="" disabled selected>Category</option>
+    <option value="none" id="none">None</option>`
+    catSelect.insertAdjacentHTML('beforeend', presentSelect)
     cats.forEach(cat => {
         let catOption = `<option value="${cat.catID}" id="${cat.catName}">${cat.catName}</option>`;
         catSelect.insertAdjacentHTML('beforeend', catOption);
     })
 
+    let presetFilter = `<option value="" disabled selected>Filter by Category</option>
+          <option value="all" id="all">All</option>`
+    catFilter.insertAdjacentHTML('beforeend', presetFilter)
     cats.forEach(cat => {
         let catOption = `<option value="${cat.catID}" id="${cat.catName}">${cat.catName}</option>`;
         catFilter.insertAdjacentHTML('beforeend', catOption);

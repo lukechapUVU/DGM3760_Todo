@@ -1,0 +1,26 @@
+{
+  "name": "dgm3760_todo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lukechapUVU/DGM3760_Todo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lukechapUVU/DGM3760_Todo/issues"
+  },
+  "homepage": "https://github.com/lukechapUVU/DGM3760_Todo#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "nodemon": "^2.0.20",
+    "underscore": "^1.13.6"
+  }
+}

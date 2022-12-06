@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Parcel Sandbox</title>
+    <meta charset="UTF-8" />
+  </head>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+  />
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  />
+  <body>
+    <div class="wrapper">
+      <header>Todo List</header>
+      <div class="todoInput">
+        <input class="userInputTodo" type="text" placeholder="Enter new task" />
+        <select name="cats" id="cats">
+        </select>
+        <button class="addBtnTodo"><i class="fas fa-plus"></i></button>
+      </div>
+      <ul class="todoList">
+        <!--<li class="done">
+          Todo Item 1<span> <i class="fa fa-trash"></i></span>
+        </li>
+        <li>
+          Todo Item 2
+          <span class="editBtn"><i class="fa fa-edit"></i></span>
+          <span> <i class="fa fa-trash"></i></span>
+        </li>-->
+      </ul>
+      <div class="footer">
+        <span>You have <span class="pending"></span> pending tasks.</span>
+        <select name="cats" id="catsFilter">
+        </select>
+        <button class="clearTodo">Clear Done</button>
+      </div>
+    </div>
+    <div class="wrapper">
+      <header>Categories</header>
+      <div class="categoryInput">
+        <input class="userInputCat" type="text" placeholder="Enter new category" />
+        <button class="addBtnCat"><i class="fas fa-plus"></i></button>
+      </div>
+      <ul class="catList">
+        <!--<li class="done">
+          Todo Item 1<span> <i class="fa fa-trash"></i></span>
+        </li>
+        <li>
+          Todo Item 2
+          <span class="editBtn"><i class="fa fa-edit"></i></span>
+          <span> <i class="fa fa-trash"></i></span>
+        </li>-->
+      </ul>
+      <div class="footer">
+      </div>
+    </div>
+
+    <script src="/todoApp.js"></script>
+  </body>
+</html>

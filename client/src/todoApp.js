@@ -53,32 +53,24 @@ todoList.addEventListener('click', event => {
 addBtnTodo.addEventListener('click', event => {
     if(todoInput.value == '') return;
     if(catSelect.value == '' || catSelect.value == 'none') {
-        getTodos().then(todos => {
-            addTodo(todos, todoInput.value, null);
-        })
+        addTodo(todoInput.value, null);
     }
     else {
-        getTodos().then(todos => {
-            addTodo(todos, todoInput.value, catSelect.value);
-        })
+        addTodo(todoInput.value, catSelect.value);
     }
 
     getTodos().then(todos => {
         loadTodos(todos);
     })
-    pending.innerHTML = getPendingTasks();
 })
 
 todoInput.addEventListener('keypress', event => {
     if(event.key == 'Enter') {
         if(todoInput.value == '') return;
-        getTodos().then(todos => {
-            addTodo(todos, todoInput.value);
-        })
+        addTodo(todoInput.value);
         getTodos().then(todos => {
             loadTodos(todos);
         })
-        pending.innerHTML = getPendingTasks();
     }
 })
 
@@ -139,6 +131,21 @@ function displayCategorizedTodos(catID) {
 }
 
 function completeTodo(idx) {
+    getTodos().then(todos => {
+        fetch('/todo', {
+            method: 'PUT',
+            body: JSON.stringify({"id": idx, "done": !todos[idx].done}),
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        getTodos().then(todos => {
+            loadTodos(todos);
+        })
+    })
+    .then(res => json())
+    
+    /*
     let todoIdx = todoArr.findIndex(todo => todo.todoID == idx);
     console.log(todoArr[todoIdx].done)
     todoArr[todoIdx].done = !todoArr[todoIdx].done;
@@ -147,9 +154,22 @@ function completeTodo(idx) {
         loadTodos(todos);
     })
     pending.innerHTML = getPendingTasks();
+    */
 }
 
-function addTodo(todos, name, category) {
+function addTodo(name, category) {
+    fetch('/todo', {
+        method: 'POST',
+        body: JSON.stringify({"todoName": name, "catID": category}),
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(res => json())
+    getTodos().then(todos => {
+        loadTodos(todos);
+    })
+    /*
     let duplicateName = false;
     todos.forEach(todo => {
         if(todo.todoName.toLowerCase() == todoInput.value.toLowerCase()) {
@@ -173,9 +193,24 @@ function addTodo(todos, name, category) {
         loadTodos(todos);
     })
     pending.innerHTML = getPendingTasks();
+    */
 }
 
 function deleteTodo(idx) {
+    fetch('/todo', {
+        method: 'DELETE',
+        body: JSON.stringify({"id": idx}),
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    getTodos().then(todos => {
+        reassignTodoIDs(todos);
+        loadTodos(todos);
+        
+    })
+    .then(res => json())
+    /*
     todoArr.splice(idx, 1);
 
     reassignIDs();
@@ -183,43 +218,35 @@ function deleteTodo(idx) {
         loadTodos(todos);
     })
     pending.innerHTML = getPendingTasks();
+    */
 }
 
 function clearDone() {
-    let i = todoArr.length
-    while (i--) {
-        if (todoArr[i].done) { 
-            todoArr.splice(i, 1);
-        } 
-    }
-
     getTodos().then(todos => {
+        let i = todos.length
+        while (i--) {
+            if (todos[i].done) { 
+                deleteTodo(i);
+            } 
+        }
+
         loadTodos(todos);
     })
-    pending.innerHTML = getPendingTasks();
 }
 
-function reassignIDs() {
-    for(let i = 0; i < todoArr.length; i++) {
-        todoArr[i].todoID = i;
+function reassignTodoIDs(todos) {
+    for(let i = 0; i < todos.length; i++) {
+        todos[i].todoID = i;
     }
-    for(let i = 0; i < cats.length; i++) {
+    /*for(let i = 0; i < cats.length; i++) {
         cats[i].catID = i;
-    }
+    }*/
 }
-
-function getPendingTasks() {
-    let count = 0;
-    /*todoArr.forEach(todo => {
-        if(!todo.done) count++;
-    })*/
-    return count;
-}
-
 
 
 function loadTodos(todos) {
     todoList.innerHTML = '';
+    let count = 0;
     todos.forEach(todo => {
         let done = todo.done ? 'done' : '';
         let hide = false;
@@ -228,6 +255,9 @@ function loadTodos(todos) {
                     </li>`;
         todoList.insertAdjacentHTML('beforeend', todoElement);
 
+        
+        if(!todo.done) count++;
+        pending.innerHTML = count;
     })
     
 }
@@ -235,13 +265,30 @@ function loadTodos(todos) {
 getTodos().then(todos => {
     loadTodos(todos);
 })
-pending.innerHTML = getPendingTasks();
 
 
 /*-------- CATEGORIES --------*/
 const catList = document.querySelector('.catList');
 let catInput = document.querySelector('.userInputCat');
 let addBtnCat = document.querySelector('.addBtnCat');
+
+let catArr = [
+    {
+        catID: 0,
+        catName: 'House chores',
+    },
+    {
+        catID: 1,
+        catName: 'Homework',
+    }
+];
+
+async function getCats() {
+    let response = await fetch('/cats');
+    let data = await response.json();
+
+    return data;
+}
 
 catList.addEventListener('click', event => {
     if((event.path[0].localName == 'i' || event.path[0].localName == 'span')) {
@@ -259,7 +306,6 @@ catList.addEventListener('click', event => {
 addBtnCat.addEventListener('click', event => {
     if(catInput.value == '') return;
     addCat(catInput.value);
-
     loadCats();
 })
 
@@ -267,28 +313,24 @@ catInput.addEventListener('keypress', event => {
     if(event.key == 'Enter') {
         if(catInput.value == '') return;
         addCat(catInput.value);
-
         loadCats();
     }
 })
 
 function addCat(name) {
-    let duplicateName = false;
-    cats.forEach(cat => {
-        if(cat.catName.toLowerCase() == catInput.value.toLowerCase()) {
-            alert('That task already exists');
-            duplicateName = true;
+    fetch('/cat', {
+        method: 'POST',
+        body: JSON.stringify({"catName": name}),
+        headers: {
+            'Content-Type': 'application/json',
         }
     })
-    catInput.value = '';
-    if(duplicateName) return;
-    let newCat = {
-        catID: cats.length,
-        catName: name,
-    }
-    cats.push(newCat);
-
-    loadCats();
+    .then(res => json())
+    getCats().then(cats => {
+        loadCats(cats);
+    })
+    catObj = {catID: catArr.length, catName: name}
+    catArr.push(catObj)
 }
 
 function editCat(pTag) {
@@ -302,31 +344,59 @@ function editCat(pTag) {
             const newPTag = document.createElement('p');
             newPTag.textContent = event.target.value;
             input.replaceWith(newPTag);
-            cats[event.path[1].dataset.catid].catName = newPTag.textContent;
+            fetch('/cat', {
+                method: 'PUT',
+                body: JSON.stringify({"id": event.path[1].dataset.catid, "catName": newPTag.textContent}),
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(res => json())
+            getCats().then(cats => {
+                loadCats(cats);
+            })
+            catArr[event.path[1].dataset.catid].catName = newPTag.textContent
             getTodos().then(todos => {
                 loadTodos(todos);
             })
-            loadCats();
         }
     })
     
 }
 
 function deleteCat(idx) {
-    cats.splice(idx, 1);
-
-    reassignIDs();
-    loadCats();
+    fetch('/cat', {
+        method: 'DELETE',
+        body: JSON.stringify({"id": idx}),
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    getCats().then(cats => {
+        reassignCatIDs(cats);
+        loadCats(cats);
+        
+    })
+    .then(res => json())
+    catArr.splice(idx, 1);
 }
 
 function categoryLookup(categoryID) {
     if(categoryID == null || categoryID == NaN) {
         return 'none';
     }
-    return (cats.at(categoryID) ? cats.at(categoryID).catName : 'none')
+    else {
+        return catArr[categoryID] ? catArr[categoryID].catName : 'none';
+    }
 }
 
-function loadCats() {
+function reassignCatIDs(cats) {
+    for(let i = 0; i < cats.length; i++) {
+        cats[i].catID = i;
+    }
+}
+
+function loadCats(cats) {
     catList.innerHTML = '';
     catFilter.innerHTML = '';
     catSelect.innerHTML = '';
@@ -360,14 +430,7 @@ function loadCats() {
     })
 }
 
-loadCats();
-
-fetch('/todo', {
-    method: 'POST',
-    body: JSON.stringify({"todoName": "todo from app"}),
-    headers: {
-        'Content-Type': 'application/json',
-    }
+getCats().then(cats => {
+    loadCats(cats);
 })
-.then(res => json())
-.then(data => console.log(data))
+

@@ -9,40 +9,34 @@ app.use(bodyParser.urlencoded({
     extended: true
 }))
 
-let todos = [
+//DB STUFF
+const mongoose = require('mongoose');
+const uri = "mongodb://dbAdmin:Iw6v3X2BaQ6pUyXR@ac-ksfv6wp-shard-00-00.k1pmhlq.mongodb.net:27017,ac-ksfv6wp-shard-00-01.k1pmhlq.mongodb.net:27017,ac-ksfv6wp-shard-00-02.k1pmhlq.mongodb.net:27017/?ssl=true&replicaSet=atlas-f6zght-shard-0&authSource=admin&retryWrites=true&w=majority";
+mongoose.set('strictQuery', true)
+mongoose.connect(
+    uri,
     {
-        todoID: 0,
-        todoName: 'Wash dishes',
-        done: false,
-        hide: false,
-        categoryID: null
-    },
-    {
-        todoID: 1,
-        todoName: 'Walk the dog',
-        done: true,
-        hide: false,
-        categoryID: 0
+        useNewUrlParser: true
     }
-];
+)
+.then(e => console.log('MongoDB Ready!'))
+.catch(console.error)
 
-let cats = [
-    {
-        catID: 0,
-        catName: 'House chores',
-    },
-    {
-        catID: 1,
-        catName: 'Homework',
+//const NewTodo = require('./database/create')
+const Todo = require('./database/todo')
+const Category = require('./database/category')
+
+app.get('/todos', async (req, res) => {
+    try {
+        const todos = await Todo.find()
+        res.json(todos)
     }
-];
-
-
-app.get('/todos', (req, res) => {
-    res.send(todos)
+    catch {
+        res.json({message:err})
+    }
 })
 
-app.get('/todosByCat', (req, res) => {
+/* app.get('/todosByCat', (req, res) => {
     let todosByCatArr = [];
     todos.forEach(todo => {
         if(todo.categoryID == req.query.catID) {
@@ -50,58 +44,106 @@ app.get('/todosByCat', (req, res) => {
         }
     })
     res.send(todosByCatArr);
+}) */
+
+app.get('/cats', async (req, res) => {
+    try {
+        const cats = await Category.find()
+        res.json(cats)
+    }
+    catch {
+        res.json({message:err})
+    }
 })
 
-app.get('/cats', (req, res) => {
-    res.send(cats);
-})
-
-app.post('/todo', (req, res) => {
-    todos.push({
-        todoID: todos.length,
+app.post('/todo', async (req, res) => {
+    const todosDB = await Todo.find()
+    const newTodo = new Todo({
+        todoID: todosDB.length,
         todoName: req.body.todoName,
         done: false,
         hide: false,
         categoryID: req.body.catID
-    })
-    res.send(todos)
+    }); 
+    try {
+        const savedTodo = await newTodo.save()
+        res.json(savedTodo)
+    }
+    catch (err) {
+        res.json({message: err})
+    }
 })
 
-app.post('/cat', (req, res) => {
-    cats.push({
-        catID: cats.length,
-        catName: req.body.catName
-    })
-    res.send(cats)
+app.post('/cat', async (req, res) => {
+    const catsDB = await Category.find()
+    const newCategory = new Category({
+        catID: catsDB.length,
+        catName: req.body.catName,
+    }); 
+    try {
+        const savedCat = await newCategory.save()
+        res.json(savedCat)
+    }
+    catch (err) {
+        res.json({message: err})
+    }
 })
 
-app.put('/todo', (req, res) => {
-    console.log(req.body)
-    
-    //todos[req.body.id].todoName = (req.body.todoName != undefined) ? req.body.todoName : todos[req.body.id].todoName
-    todos[req.body.id].done = (req.body.done != undefined) ? req.body.done : todos[req.body.id].done
-    //todos[req.body.id].categoryID = (req.body.categoryID != undefined) ? parseInt(req.body.categoryID) : todos[req.body.id].categoryID
-    console.log(todos)
-    res.send(todos)
+app.put('/todo', async (req, res) => {
+    const todo = await Todo.findOne({ todoID: { $eq: req.body.id } })
+    console.log(req.body.id)
+    console.log(todo)
+    if(!todo) {
+        throw new Error('Todo not found')
+    }
+
+    todo.done = !todo.done
+
+    try {
+        const result = await todo.save()
+        res.json(result)
+    }
+    catch (err) {
+        res.json({message: err})
+    }
 })
 
-app.put('/cat', (req, res) => {
-    cats[req.body.id].catName = (req.body.catName != null) ? req.body.catName : cats[req.body.id].catName
+app.put('/cat', async (req, res) => {
+    const category = await Category.findOne(req.body.id)
 
-    res.send(cats)
+    if(!category) {
+        throw new Error('Category not found')
+    }
+
+    category.catName = req.body.catName
+
+    try {
+        const result = await category.save()
+        res.json(result)
+    }
+    catch (err) {
+        res.json({message: err})
+    }
 })
 
-app.delete('/todo', (req, res) => {
-    console.log(req.body)
-    todos.splice(req.body.id, 1)
-
-    res.send(todos)
+app.delete('/todo', async (req, res) => {
+    try {
+        const removedTodo = await Todo.remove({todoID: req.body.id})
+        res.json(removedTodo)
+    }
+    catch (err) {
+        res.json({ message: err })
+    }
 })
 
-app.delete('/cat', (req, res) => {
-    cats.splice(req.query.id, 1)
-
-    res.send(cats)
+app.delete('/cat', async (req, res) => {
+    try {
+        const removedCategory = await Category.remove({catID: req.body.id})
+        res.json(removedCategory)
+    }
+    catch (err) {
+        res.json({ message: err })
+    }
 })
 
 app.listen(port, () => {

@@ -60,7 +60,7 @@ addBtnTodo.addEventListener('click', event => {
     }
 
     getTodos().then(todos => {
-        loadTodos(todos);
+        loadTodos()
     })
 })
 
@@ -69,7 +69,7 @@ todoInput.addEventListener('keypress', event => {
         if(todoInput.value == '') return;
         addTodo(todoInput.value);
         getTodos().then(todos => {
-            loadTodos(todos);
+            loadTodos()
         })
     }
 })
@@ -125,7 +125,7 @@ function displayCategorizedTodos(catID) {
              */
         })
         getTodos().then(todos => {
-            loadTodos(todos);
+            loadTodos()
         })
     }
 }
@@ -134,24 +134,24 @@ function completeTodo(idx) {
     getTodos().then(todos => {
         fetch('/todo', {
             method: 'PUT',
-            body: JSON.stringify({"id": idx, "done": !todos[idx].done}),
+            body: JSON.stringify({"id": idx}),
             headers: {
                 'Content-Type': 'application/json',
             }
         })
-        getTodos().then(todos => {
-            loadTodos(todos);
-        })
+        
     })
     .then(res => json())
-    
+    getTodos().then(todos => {
+        loadTodos()
+    })
     /*
     let todoIdx = todoArr.findIndex(todo => todo.todoID == idx);
     console.log(todoArr[todoIdx].done)
     todoArr[todoIdx].done = !todoArr[todoIdx].done;
     console.log(todoArr[todoIdx].done)
     getTodos().then(todos => {
-        loadTodos(todos);
+        loadTodos()
     })
     pending.innerHTML = getPendingTasks();
     */
@@ -167,7 +167,7 @@ function addTodo(name, category) {
     })
     .then(res => json())
     getTodos().then(todos => {
-        loadTodos(todos);
+        loadTodos()
     })
     /*
     let duplicateName = false;
@@ -190,7 +190,7 @@ function addTodo(name, category) {
     todos.push(newTodo);
 
     getTodos().then(todos => {
-        loadTodos(todos);
+        loadTodos()
     })
     pending.innerHTML = getPendingTasks();
     */
@@ -206,7 +206,7 @@ function deleteTodo(idx) {
     })
     getTodos().then(todos => {
         reassignTodoIDs(todos);
-        loadTodos(todos);
+        loadTodos()
         
     })
     .then(res => json())
@@ -215,7 +215,7 @@ function deleteTodo(idx) {
 
     reassignIDs();
     getTodos().then(todos => {
-        loadTodos(todos);
+        loadTodos()
     })
     pending.innerHTML = getPendingTasks();
     */
@@ -230,7 +230,7 @@ function clearDone() {
             } 
         }
 
-        loadTodos(todos);
+        loadTodos()
     })
 }
 
@@ -244,26 +244,29 @@ function reassignTodoIDs(todos) {
 }
 
 
-function loadTodos(todos) {
-    todoList.innerHTML = '';
-    let count = 0;
-    todos.forEach(todo => {
-        let done = todo.done ? 'done' : '';
-        let hide = false;
-        let todoElement = `<li id="${hide}" class="${done}" data-todoID='${todo.todoID}'>
-                        ${todo.todoName} > Category: ${categoryLookup(todo.categoryID)}<span> <i class="fa fa-trash"></i></span>
-                    </li>`;
-        todoList.insertAdjacentHTML('beforeend', todoElement);
-
-        
-        if(!todo.done) count++;
-        pending.innerHTML = count;
-    })
+function loadTodos() {
     
+    getTodos().then(todos => {
+    
+        todoList.innerHTML = '';
+        let count = 0;
+        todos.forEach(todo => {
+            let done = todo.done ? 'done' : '';
+            let hide = false;
+            let todoElement = `<li id="${hide}" class="${done}" data-todoID='${todo.todoID}'>
+                            ${todo.todoName} > Category: ${categoryLookup(todo.categoryID)}<span> <i class="fa fa-trash"></i></span>
+                        </li>`;
+            todoList.insertAdjacentHTML('beforeend', todoElement);
+
+            
+            if(!todo.done) count++;
+            pending.innerHTML = count;
+        })  
+    })
 }
 
 getTodos().then(todos => {
-    loadTodos(todos);
+    loadTodos()
 })
 
 
@@ -357,7 +360,7 @@ function editCat(pTag) {
             })
             catArr[event.path[1].dataset.catid].catName = newPTag.textContent
             getTodos().then(todos => {
-                loadTodos(todos);
+                loadTodos()
             })
         }
     })
@@ -426,7 +429,7 @@ function loadCats(cats) {
     })
 
     getTodos().then(todos => {
-        loadTodos(todos);
+        loadTodos()
     })
 }
 
